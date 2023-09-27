@@ -1,0 +1,28 @@
+{
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "!apps/frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "format": "prettier --write \"**/*.{js,jsx,md}\"",
+    "lint": "turbo run lint",
+    "publicar": "yarn format && yarn lint && yarn test",
+    "test": "turbo run test"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "*",
+    "prettier": "latest",
+    "turbo": "latest"
+  },
+  "packageManager": "npm@8.19.2",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "prisma": {
+    "schema": "packages/db/prisma/schema.prisma"
+  }
+}

@@ -1,0 +1,14 @@
+@import '~antd/dist/antd.css';
+@import '~@ant-design/pro-form/dist/form.css';
+@import '~@ant-design/pro-table/dist/table.css';
+@import '~@ant-design/pro-layout/dist/layout.css';
+
+.divergencePositive {
+  background-color: #d9f7be;
+}
+.divergenceNegative {
+  background-color: #ffccc7;
+}
+.divergenceNeutral {
+  background-color: #ffffb8;
+}

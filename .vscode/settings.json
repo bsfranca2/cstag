@@ -1,0 +1,8 @@
+{
+  "cSpell.words": ["cstag"],
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "editor.formatOnSave": false,
+  "eslint.validate": ["javascript"]
+}

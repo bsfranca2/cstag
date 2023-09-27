@@ -1,0 +1,8 @@
+FROM node:lts-alpine
+WORKDIR /app
+COPY packages/ /app/packages/
+COPY services/event_consumer/ /app/services/event_consumer/
+COPY package*.json /app/
+RUN npm install
+# USER node
+CMD ["npm", "run", "dev", "--workspace=services/event_consumer"]

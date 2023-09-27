@@ -2,58 +2,120 @@ version: '3'
 
 services:
   postgres:
-    restart: always
-    image: postgres
+    container_name: cstag_db
+    image: postgres:14.2
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: randompassword
+      POSTGRES_DB: cstag
     ports:
       - 5432:5432
     networks:
-      - backend
-    environment:
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: cstag
+      - main
+
+  rabbit:
+    container_name: cstag_rabbit
+    image: rabbitmq:3.9.14-management-alpine
+    hostname: rabbit-master
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-  
+      - rabbit-data:/var/lib/rabbitmq
+    environment:
+      POSTGRES_PASSWORD: randompassword
+      POSTGRES_DB: cstag
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - main
+
   elasticsearch:
-    restart: always
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    container_name: cstag_elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.1.2
     ports:
       - 9200:9200
-    networks:
-      - backend
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
     volumes:
       - search-data:/usr/share/elasticsearch/data
     mem_limit: 3072M
+    networks:
+      - main
 
   kibana:
-    restart: always
-    image: docker.elastic.co/kibana/kibana:7.11.1
+    container_name: cstag_kibana
+    image: docker.elastic.co/kibana/kibana:8.1.2
     environment:
-      - ELASTICSEARCH_HOSTS=http://192.168.0.10:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
       - 5601:5601
     depends_on:
       - elasticsearch
-
-  rabbit:
-    restart: always
-    image: rabbitmq:3-management
-    hostname: rabbit-master
-    ports:
-      - 5672:5672
-      - 15672:15672
     networks:
-      - backend
+      - main
+
+  nginx:
+    container_name: cstag_static
+    image: nginx:1.20-alpine
     volumes:
-      - rabbit-data:/var/lib/rabbitmq
+      - ./infra/dev/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:8080
+    networks:
+      - main
+    depends_on:
+      - api
+      - frontend
+
+  event_consumer:
+    container_name: cstag_event_consumer
+    command: npm run dev
+    build:
+      context: .
+      dockerfile: ./services/event-consumer/Dockerfile.dev
+    volumes:
+      - ./services/event-consumer/src:/app/services/event-consumer/src
+    env_file:
+      - ./services/event-consumer/.env
+    networks:
+      - main
+    depends_on:
+      - postgres
+      - rabbit
+
+  api:
+    container_name: cstag_api
+    command: npm run dev
+    build:
+      context: .
+      dockerfile: ./services/api/Dockerfile.dev
+    volumes:
+      - ./services/api/src:/app/services/api/src
+    env_file:
+      - ./services/api/.env
+    networks:
+      - main
+    depends_on:
+      - postgres
+      - elasticsearch
+      - rabbit
+
+  frontend:
+    container_name: cstag_front
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+     - ./services/frontend/src:/app/src
+     - ./services/frontend/public:/app/public
+    networks:
+      - main
 
 volumes:
   postgres-data:
-  search-data:
   rabbit-data:
+  search-data:
 
-networks: 
-  backend:
+networks:
+  main:

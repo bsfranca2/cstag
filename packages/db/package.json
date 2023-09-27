@@ -1,0 +1,19 @@
+{
+  "name": "@cstag/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js,.ts --format=pretty ./",
+    "lint:fix": "yarn run lint --fix"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "*"
+  },
+  "optionalDependencies": {
+    "@prisma/client": "4.7.1",
+    "knex": "2.3.0",
+    "pg": "8.8.0"
+  }
+}
