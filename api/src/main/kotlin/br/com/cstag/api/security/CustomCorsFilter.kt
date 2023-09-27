@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class CustomCorsFilter: Filter {
 
-    private val origin = System.getenv("ORIGIN") ?: "http://localhost:8080"
+    private val origin = System.getenv("ORIGIN") ?: "http://localhost:3000"
 
     override fun doFilter(req: ServletRequest, res: ServletResponse, chain: FilterChain) {
         val response = res as HttpServletResponse

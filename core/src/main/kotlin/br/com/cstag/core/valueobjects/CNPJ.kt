@@ -1,8 +1,6 @@
 package br.com.cstag.core.valueobjects
 
 import java.io.Serializable
-import javax.persistence.AttributeOverride
-import javax.persistence.Column
 import javax.persistence.Embeddable
 
 @Embeddable

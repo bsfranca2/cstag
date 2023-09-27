@@ -1,14 +1,13 @@
 package br.com.cstag.core.services.tollPlaza
 
 import br.com.cstag.core.constants.MessageBrokerConstant
-import br.com.cstag.core.dto.TollPlazaMessageDto
+import br.com.cstag.core.dto.messages.TollPlazaMessageDto
 import br.com.cstag.core.entities.LocalDateRange
 import br.com.cstag.core.entities.TollPlazaPeriod
 import br.com.cstag.core.enums.ImportStatus
 import br.com.cstag.core.gateways.ExcelGateway
 import br.com.cstag.core.gateways.MessageBrokerGateway
 import br.com.cstag.core.gateways.StorageGateway
-import br.com.cstag.core.repositories.TollPlazaPeriodRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File

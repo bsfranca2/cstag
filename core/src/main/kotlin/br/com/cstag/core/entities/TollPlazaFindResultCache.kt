@@ -11,7 +11,7 @@ data class TollPlazaFindResultCache(
     val startOfPeriod: LocalDate,
     val endOfPeriod: LocalDate?,
     @ManyToOne(cascade = [CascadeType.DETACH])
-    @JoinColumn(name = "toll_plaza_idd")
+    @JoinColumn(name = "toll_plaza_id")
     val tollPlaza: TollPlaza,
     val isVerified: Boolean,
     val hasLowProbabilityRate: Boolean,
@@ -19,6 +19,4 @@ data class TollPlazaFindResultCache(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = -1
-    val period
-        get() = LocalDateRange(startOfPeriod, endOfPeriod)
 }

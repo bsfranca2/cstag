@@ -1,11 +1,6 @@
 package br.com.cstag.core.entities
 
-import br.com.cstag.core.enums.DivergenceStatus
-import br.com.cstag.core.valueobjects.CNPJ
-import br.com.cstag.core.valueobjects.LicensePlate
-import java.io.Serializable
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDateTime
 import javax.persistence.*
 
@@ -15,9 +10,12 @@ data class CreditAndDebitAnalysis(
     @ManyToOne(cascade = [CascadeType.DETACH])
     @JoinColumn(name = "shipping_company_id", nullable = false)
     val shippingCompany: ShippingCompany,
-    @Column(nullable = false)
     val trip: String,
 ) {
+    enum class Divergence {
+        Debit, Credit
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = -1
@@ -28,22 +26,11 @@ data class CreditAndDebitAnalysis(
     var licensePlate: LicensePlate? = null
     var startOfPeriod: LocalDateTime? = null
     var endOfPeriod: LocalDateTime? = null
-    @Embedded
-    @AttributeOverrides(
-        AttributeOverride(name = "type", column = Column(name = "divergenceType")),
-        AttributeOverride(name = "status", column = Column(name = "divergenceStatus"))
-    )
-    var divergence: CreditAndDebitAnalysisDivergence? = null
-}
+    @Enumerated(EnumType.STRING)
+    var divergence: Divergence? = null
 
-@Embeddable
-data class CreditAndDebitAnalysisDivergence(
-    @Enumerated(EnumType.STRING)
-    var type: Type,
-    @Enumerated(EnumType.STRING)
-    var status: DivergenceStatus,
-) : Serializable {
-    enum class Type {
-        Debit, Credit
-    }
+    @OneToMany
+    var creditList = listOf<TollValleyCredit>()
+    @OneToMany
+    var ticketList = listOf<Ticket>()
 }

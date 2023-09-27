@@ -1,14 +1,12 @@
 package br.com.cstag.api.dto
 
 import br.com.cstag.core.entities.Invoice
-import br.com.cstag.core.entities.getOperatorCompany
-import java.time.LocalDateTime
 
 data class InvoiceDto(
-    val number: Long,
-    val issueDate: LocalDateTime,
+    val identifier: String,
     val operatorCompany: String,
-    val progress: ProgressDto
+    val metadata: Map<String, String>,
+    val progress: ProgressDto,
 )
 
 data class ProgressDto(
@@ -18,8 +16,8 @@ data class ProgressDto(
 
 fun Invoice.toInvoiceDto() =
     InvoiceDto(
-        number = number,
-        issueDate = issueDate,
-        operatorCompany = this.getOperatorCompany().toString(),
+        identifier = identifier,
+        operatorCompany = operatorCompany.toString(),
+        metadata = metadata.data,
         progress = ProgressDto(progress.isDone(), progress.getPercentage())
     )

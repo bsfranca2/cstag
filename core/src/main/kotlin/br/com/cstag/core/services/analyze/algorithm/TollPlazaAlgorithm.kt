@@ -1,8 +1,7 @@
 package br.com.cstag.core.services.analyze.algorithm
 
-import br.com.cstag.core.entities.TollTicket
-import br.com.cstag.core.entities.TollTicketAnalysis
+import br.com.cstag.core.entities.TicketAnalysis
 
 interface TollPlazaAlgorithm {
-    fun analyze(analysis: TollTicketAnalysis): TollTicketAnalysis
+    fun analyze(analysis: TicketAnalysis): TicketAnalysis
 }

@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.access.channel.ChannelProcessingFilter
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -30,7 +29,7 @@ class WebSecurityConfiguration : WebSecurityConfigurerAdapter() {
     private lateinit var customCorsFilter: CustomCorsFilter
 
     @Autowired
-    private lateinit var getAccountLoggedContextService: GetAccountLoggedContextService
+    private lateinit var accountLoggedContextService: AccountLoggedContextService
 
     @Autowired
     private lateinit var userDetailsService: UserDetailsServiceImpl
@@ -42,9 +41,9 @@ class WebSecurityConfiguration : WebSecurityConfigurerAdapter() {
 
     @Bean
     fun jwtAuthenticationFilter(
-        getAccountLoggedContextService: GetAccountLoggedContextService
+        accountLoggedContextService: AccountLoggedContextService
     ): JwtAuthenticationFilter {
-        return JwtAuthenticationFilter(getAccountLoggedContextService)
+        return JwtAuthenticationFilter(accountLoggedContextService)
     }
 
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
@@ -73,7 +72,7 @@ class WebSecurityConfiguration : WebSecurityConfigurerAdapter() {
     }
 
     override fun configure(httpSecurity: HttpSecurity) {
-        httpSecurity.addFilterBefore(jwtAuthenticationFilter(getAccountLoggedContextService), UsernamePasswordAuthenticationFilter::class.java)
+        httpSecurity.addFilterBefore(jwtAuthenticationFilter(accountLoggedContextService), UsernamePasswordAuthenticationFilter::class.java)
             .addFilterBefore(customCorsFilter, ChannelProcessingFilter::class.java)
             .csrf().disable()
             .exceptionHandling()
@@ -83,7 +82,7 @@ class WebSecurityConfiguration : WebSecurityConfigurerAdapter() {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-            .antMatchers("/api/auth/**")
+            .antMatchers("/api/auth/**", "/api/actuator/**")
             .permitAll()
             .antMatchers("/api/accounts/**", "/api/toll-plazas/**")
             .hasAuthority("Admin")

@@ -1,7 +1,6 @@
 package br.com.cstag.api.security
 
 import br.com.cstag.api.dto.TokenDto
-import br.com.cstag.api.dto.toUserPrincipal
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
@@ -11,7 +10,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 class JwtAuthenticationFilter(
-    private val getAccountLoggedContextService: GetAccountLoggedContextService
+    private val accountLoggedContextService: AccountLoggedContextService
 ) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -21,8 +20,8 @@ class JwtAuthenticationFilter(
         try {
             val jwt = getJwtFromRequest(request)
             if (jwt.isNotBlank()) {
-                val account = getAccountLoggedContextService.getAccountContext(TokenDto(jwt))
-                val userPrincipal = account.toUserPrincipal()
+                val account = accountLoggedContextService.getAccountContext(TokenDto(jwt))
+                val userPrincipal = UserPrincipal(account)
                 val authentication = UsernamePasswordAuthenticationToken(
                     userPrincipal,
                     null,

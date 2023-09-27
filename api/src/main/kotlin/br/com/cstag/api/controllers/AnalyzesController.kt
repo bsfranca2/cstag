@@ -1,48 +1,69 @@
 package br.com.cstag.api.controllers
 
-import br.com.cstag.api.dto.TollTicketAnalysisDto
-import br.com.cstag.api.dto.toTollTicketAnalysisDto
-import br.com.cstag.api.security.GetAccountLoggedContextService
-import br.com.cstag.core.dto.*
-import br.com.cstag.core.services.AnalyzeSearchService
-import br.com.cstag.core.services.TollTicketAnalysisService
+import br.com.cstag.api.dto.CreditAndDebitDetailsDto
+import br.com.cstag.api.dto.toCreditAndDebitDetailsDto
+import br.com.cstag.api.security.AccountLoggedContextService
+import br.com.cstag.core.dto.CreditDebitAnalysisFilterDto
+import br.com.cstag.core.dto.CreditDebitStatisticsDto
+import br.com.cstag.core.dto.PaginationDto
+import br.com.cstag.core.dto.TicketAnalysisFilterDto
+import br.com.cstag.core.search.entities.CreditAndDebitAnalysisSearch
+import br.com.cstag.core.search.entities.TicketAnalysisSearch
+import br.com.cstag.core.services.analyze.AnalyzeCreditAndDebitService
+import br.com.cstag.core.services.analyze.AnalyzesSearchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/analyzes/")
+@RequestMapping("/analyzes")
 class AnalyzesController {
-    @Autowired
-    lateinit var analyzeSearchService: AnalyzeSearchService
 
     @Autowired
-    lateinit var tollTicketAnalysisService: TollTicketAnalysisService
+    lateinit var analyzesSearchService: AnalyzesSearchService
 
     @Autowired
-    lateinit var getAccountLoggedContextService: GetAccountLoggedContextService
+    lateinit var accountLoggedContextService: AccountLoggedContextService
 
-    @PostMapping("/toll-ticket/search")
-    fun searchTollTicket(
-        @RequestBody dto: TollTicketAnalysisFilterDto,
+    @Autowired
+    lateinit var creditAndDebitService: AnalyzeCreditAndDebitService
+
+    fun getAccount() =
+        accountLoggedContextService.getAccount()
+
+    @RequestMapping("/ticket-analysis/search")
+    fun listTicket(
+        @RequestBody dto: TicketAnalysisFilterDto?,
         @RequestParam perPage: Int? = null,
         @RequestParam page: Int? = null
-    ): SearchResultDto<TollTicketAnalysisSearchDto> {
-        dto.shippingCompanyCNPJ = getAccountLoggedContextService.getAccountCNPJ()
-        return analyzeSearchService.search(dto, PaginateDto(perPage, page))
+    ): PaginationDto<TicketAnalysisSearch> {
+        val filterDto = dto ?: TicketAnalysisFilterDto()
+        filterDto.shippingCompanyCNPJ = getAccount().company.cnpj.value
+        return analyzesSearchService.search(filterDto, perPage, page)
     }
 
-    @GetMapping("/toll-ticket/{id}")
-    fun getTollTicketById(@PathVariable id: Long): TollTicketAnalysisDto? {
-        return tollTicketAnalysisService.findById(id)?.toTollTicketAnalysisDto()
-    }
-
-    @PostMapping("/credit-debit/search")
-    fun searchCreditAndDebit(
-        @RequestBody dto: CreditAndDebitAnalysisFilterDto,
+    @RequestMapping("/credit-debit-analysis/search")
+    fun listCreditDebit(
+        @RequestBody dto: CreditDebitAnalysisFilterDto?,
         @RequestParam perPage: Int? = null,
         @RequestParam page: Int? = null
-    ): SearchResultDto<CreditAndDebitAnalysisSearchDto> {
-        dto.shippingCompanyCNPJ = getAccountLoggedContextService.getAccountCNPJ()
-        return analyzeSearchService.search(dto, PaginateDto(perPage, page))
+    ): PaginationDto<CreditAndDebitAnalysisSearch> {
+        val filterDto = dto ?: CreditDebitAnalysisFilterDto()
+        filterDto.shippingCompanyCNPJ = getAccount().company.cnpj.value
+        return analyzesSearchService.searchPaginate(filterDto, perPage, page)
+    }
+
+    @RequestMapping("/credit-debit-analysis/statistics")
+    fun statisticsCreditAndDebit(
+        @RequestBody dto: CreditDebitAnalysisFilterDto?,
+    ): CreditDebitStatisticsDto {
+        val filterDto = dto ?: CreditDebitAnalysisFilterDto()
+        filterDto.shippingCompanyCNPJ = getAccount().company.cnpj.value
+        return analyzesSearchService.statistics(filterDto)
+    }
+
+    @RequestMapping("/credit-debit-analysis/{id}")
+    fun creditAndDebitDetails(@PathVariable id: Long): CreditAndDebitDetailsDto {
+        val shippingCompany = getAccount().company.cnpj
+        return creditAndDebitService.details(shippingCompany, id).toCreditAndDebitDetailsDto()
     }
 }

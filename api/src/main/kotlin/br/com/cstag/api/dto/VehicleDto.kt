@@ -1,9 +1,10 @@
 package br.com.cstag.api.dto
 
-import br.com.cstag.core.entities.InstantRange
+import br.com.cstag.core.entities.LicensePlate
+import br.com.cstag.core.entities.LocalDateTimeRange
 import br.com.cstag.core.entities.Vehicle
-import br.com.cstag.core.valueobjects.LicensePlate
 import java.time.Instant
+import java.time.ZoneId
 
 data class VehicleDto(
     val licensePlate: String,
@@ -50,7 +51,9 @@ fun VehicleDto.toVehicle() =
     ).apply {
         brand = this@toVehicle.brand
         axlesRegistries.addAll(this@toVehicle.axlesRegistries.map { it.toAxlesRegistry() })
+        axlesRegistries.forEach { it.vehicle = this }
         clientRegistries.addAll(this@toVehicle.clientRegistries.map { it.toClientRegistry() })
+        clientRegistries.forEach { it.vehicle = this }
         model = this@toVehicle.model
         year = this@toVehicle.year
         description = this@toVehicle.description
@@ -61,21 +64,21 @@ fun Vehicle.AxlesRegistry.toAxlesRegistryDto() =
         id = id,
         total = total,
         suspended = suspended,
-        startOfPeriod = period.startAt,
-        endOfPeriod = period.endAt
+        startOfPeriod = period.startAt.atZone(ZoneId.systemDefault()).toInstant(),
+        endOfPeriod = period.endAt?.atZone(ZoneId.systemDefault())?.toInstant(),
     )
 
 fun VehicleDto.AxlesRegistry.toAxlesRegistry() =
     Vehicle.AxlesRegistry(
-        id, total, suspended, InstantRange(startOfPeriod, endOfPeriod)
+        id, total, suspended, LocalDateTimeRange(startOfPeriod, endOfPeriod)
     )
 
 fun VehicleDto.ClientRegistry.toClientRegistry() =
     Vehicle.ClientRegistry(
-        id, segment, client, group, subgroup, InstantRange(startOfPeriod, endOfPeriod)
+        id, segment, client, group, subgroup, LocalDateTimeRange(startOfPeriod, endOfPeriod)
     )
 
 fun Vehicle.ClientRegistry.toClientRegistryDto() =
     VehicleDto.ClientRegistry(
-        id, segment, client, group, subgroup, period.startAt, period.endAt
+        id, segment, client, group, subgroup, period.startAt.atZone(ZoneId.systemDefault()).toInstant(), period.endAt?.atZone(ZoneId.systemDefault())?.toInstant()
     )

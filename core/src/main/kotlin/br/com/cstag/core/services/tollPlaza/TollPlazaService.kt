@@ -6,6 +6,7 @@ import br.com.cstag.core.entities.TollPlazaPeriod
 import br.com.cstag.core.exceptions.NotFoundException
 import br.com.cstag.core.repositories.TollPlazaPeriodRepository
 import br.com.cstag.core.repositories.TollPlazaRepository
+import br.com.cstag.core.services.analyze.algorithm.TollPlazaFindAlgorithm
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -17,13 +18,15 @@ class TollPlazaService(
     private val tollPlazaPeriodRepository: TollPlazaPeriodRepository,
     private val tollPlazaRepository: TollPlazaRepository
 ) {
+    private val tollPlazaFindAlgorithm = TollPlazaFindAlgorithm()
+
     fun findPeriodById(tollPlazaPeriodId: Int): TollPlazaPeriod {
         return tollPlazaPeriodRepository.findByIdOrNull(tollPlazaPeriodId)
             ?: throw NotFoundException("Periodo de praça $tollPlazaPeriodId não encontrado")
     }
 
     fun listPeriods(): List<TollPlazaPeriod> {
-        return tollPlazaPeriodRepository.findAll().toList()
+        return tollPlazaPeriodRepository.findAll().toList().sortedBy { it.startOfPeriod }.sortedBy { it.endOfPeriod }
     }
 
     @Transactional
@@ -43,5 +46,10 @@ class TollPlazaService(
             .findByStartOfPeriodLessThanEqualAndEndOfPeriodGreaterThanEqual(date, date)
             ?: return mutableListOf()
         return tollPlazaRepository.findByPeriodAndCategory(period, category)
+    }
+
+    fun findForTicket(fullRoadName: String, date: LocalDate, category: Int): TollPlazaFindAlgorithm.Result {
+        val tollPlazas = findByDateAndCategory(date, category)
+        return tollPlazaFindAlgorithm.find(fullRoadName, category, tollPlazas)
     }
 }

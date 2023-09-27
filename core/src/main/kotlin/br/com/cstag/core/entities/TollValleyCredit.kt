@@ -1,32 +1,32 @@
 package br.com.cstag.core.entities
 
 import br.com.cstag.core.enums.OperatorCompany
-import br.com.cstag.core.enums.TollRegistryStatus
-import br.com.cstag.core.valueobjects.LicensePlate
+import br.com.cstag.core.enums.Source
+import br.com.cstag.core.mappers.MetadataConverter
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import javax.persistence.*
 
-@Entity(name = "TollValleyCredit")
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@DiscriminatorColumn(name = "operator_company", discriminatorType = DiscriminatorType.STRING)
-abstract class TollValleyCredit(
+@Entity
+@Table(name = "toll_valley_credits")
+class TollValleyCredit {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    open var id: Long,
+    var id: Long = -1
+    var trip: String? = null
+    var value: BigDecimal? = null
     @Embedded
     @AttributeOverride(name = "value", column = Column(name = "license_plate"))
-    open var licensePlate: LicensePlate,
-    open var category: Int,
-    open var value: BigDecimal,
-    open var receivedAt: LocalDateTime,
+    var licensePlate: LicensePlate? = null
+    @Convert(converter = MetadataConverter::class)
+    @Column(columnDefinition = "TEXT")
+    var metadata = Metadata()
     @Enumerated(EnumType.STRING)
-    open var status: TollRegistryStatus,
-    @Column(name = "operator_company")
+    var operatorCompany: OperatorCompany? = null
+    var receivedAt: LocalDateTime? = null
     @Enumerated(EnumType.STRING)
-    open var operatorCompany: OperatorCompany
-) {
+    var source: Source? = null
     @ManyToOne(cascade = [CascadeType.DETACH])
     @JoinColumn(name = "invoice_id")
-    open lateinit var invoice: Invoice
+    var invoice: Invoice? = null
 }

@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository
 import java.time.LocalDate
 
 interface TollPlazaFindResultCacheRepository : CrudRepository<TollPlazaFindResultCache, String> {
-    fun findByHighwayAndCategoryAndStartOfPeriodLessThanEqualAndEndOfPeriodGreaterThanEqual(
-        highway: String, category: Int, startOfPeriod: LocalDate, endOfPeriod: LocalDate
+    fun findByStartOfPeriodLessThanEqualAndEndOfPeriodGreaterThanEqualAndCategoryAndHighway(
+        startOfPeriod: LocalDate?, endOfPeriod: LocalDate?, category: Int?, highway: String?
     ): TollPlazaFindResultCache?
 }

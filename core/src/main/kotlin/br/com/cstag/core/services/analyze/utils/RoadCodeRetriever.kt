@@ -25,7 +25,7 @@ object RoadCodeRetriever {
                 )
             }
         }
-        throw NotFoundException("Road code not found from $road")
+        throw NotFoundException("Número da rodovia não entrado em $road")
     }
 
     private fun getRoadCode(word: String, road: String): String {

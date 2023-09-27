@@ -1,10 +1,10 @@
 package br.com.cstag.adapters.token.jwt
 
 import br.com.cstag.core.entities.Account
-import br.com.cstag.core.gateways.TokenGateway
 import br.com.cstag.core.valueobjects.Token
-import com.sun.org.slf4j.internal.LoggerFactory
+import br.com.cstag.core.gateways.TokenGateway
 import io.jsonwebtoken.*
+import org.slf4j.LoggerFactory
 import java.util.*
 
 class TokenGatewayImp : TokenGateway {
@@ -14,13 +14,7 @@ class TokenGatewayImp : TokenGateway {
 
     override fun generate(account: Account): Token {
         val now = Date()
-        val claims = mapOf(
-            "companyCNPJ" to account.company.cnpj.value,
-            "companyName" to account.company.companyName,
-            "role" to account.role
-        )
         val token = Jwts.builder()
-            .setClaims(claims)
             .setSubject(account.company.cnpj.value)
             .setIssuedAt(now)
             .setExpiration(Date(now.time.plus(jwtExpirationInMs.toInt())))

@@ -25,3 +25,8 @@ interface Cell {
     fun numericCellValue(): Double
     fun localDateTimeValue(): LocalDateTime
 }
+
+fun MutableList<Row>.withoutHeader(): MutableList<Row> {
+    this.removeFirst()
+    return this
+}

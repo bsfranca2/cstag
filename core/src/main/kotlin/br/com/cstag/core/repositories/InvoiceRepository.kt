@@ -6,5 +6,6 @@ import br.com.cstag.core.valueobjects.CNPJ
 import org.springframework.data.repository.CrudRepository
 
 interface InvoiceRepository : CrudRepository<Invoice, Long> {
+    fun findByShippingCompanyAndIdentifier(shippingCompany: ShippingCompany, identifier: String): Invoice?
     fun findByShippingCompany_Cnpj(shippingCompanyCnpj: CNPJ): MutableList<Invoice>
 }
