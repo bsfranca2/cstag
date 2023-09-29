@@ -1,4 +1,4 @@
-import prisma from '@prisma/client';
+import {prisma} from '@cstag/db';
 import assignIn from 'lodash.assignin';
 
 /**
@@ -11,7 +11,7 @@ export const duplicateTollPlazas = (
   tollPlazaPeriodIdFrom,
   tollPlazaPeriodIdTo
 ) =>
-  prisma.sql`INSERT INTO
+  prisma.$executeRaw`INSERT INTO
   tb_toll_plaza("associate_company", "highway", "km", "category", "value", "full_road_name", "metadata", "id_toll_plaza_period")
   SELECT "associate_company", "highway", "km", "category", "value", "full_road_name", "metadata", ${tollPlazaPeriodIdTo} as "id_toll_plaza_period"
   FROM tb_toll_plaza WHERE id_toll_plaza_period = ${tollPlazaPeriodIdFrom}`;

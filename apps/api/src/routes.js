@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAnalysisRouter } from './components/analysis/index.js';
+// import { getAnalysisRouter } from './components/analysis/index.js';
 import { getCompanyRouter } from './components/company/index.js';
 import { getInvoiceRouter } from './components/invoice/index.js';
 import { getTollPlazaRouter } from './components/toll-plaza/index.js';
@@ -16,6 +16,6 @@ export const getRouter = () => {
   router.use(getUserRouter());
   router.use(getTollPlazaRouter());
   router.use(getInvoiceRouter());
-  router.use(getAnalysisRouter());
+  // router.use(getAnalysisRouter());
   return router;
 };

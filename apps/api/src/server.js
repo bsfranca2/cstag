@@ -1,32 +1,23 @@
 import crypto from 'node:crypto';
-import { startConnection } from '@cstag/amqp';
-import { getPrismaClientManager, initPrismaModule } from '@cstag/db';
-import { ensureAllIndiceExists } from '@cstag/elasticsearch';
+import { prisma } from '@cstag/db'
 import { createLogger } from '@cstag/logger';
 import cors from 'cors';
 import express from 'express';
 import { queryParser } from 'express-query-parser';
 import helmet from 'helmet';
-import swaggerUi from 'swagger-ui-express';
 import { errorHandler } from './error.js';
+import { startJobs } from './jobs/index.js'
 import loggerMiddleware from './middleware/request.js';
 import { getRouter } from './routes.js';
+import { swaggerDocs } from './utils/swagger.js';
+
 const logger = createLogger('server');
 let server;
-
-const swaggerDocument = {
-  openapi: '3.0.3',
-  info: {
-    title: 'CStag API',
-    description: 'Api do cstag todas as operacoes',
-    version: '1.0.0',
-  },
-};
 
 export const shutdown = async (code = 0) => {
   if (server) {
     server.close(async () => {
-      await getPrismaClientManager().closeAllConnections();
+      await prisma.$disconnect();
       logger.info('Exit process');
       process.exit(code);
     });
@@ -59,8 +50,12 @@ export const initServer = async () => {
     app.disable('x-powered-by');
     app.use(requestId);
     app.use(loggerMiddleware);
+    app.use((req, res, next) => {
+      req.repository = prisma;
+      return next();
+    });
     app.use(getRouter());
-    app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    swaggerDocs(app)
     app.use('*', (_, res) =>
       res.status(404).json({ message: 'Resource not found' })
     );
@@ -89,8 +84,7 @@ export const initServer = async () => {
 };
 
 export const startApp = async () => {
-  await ensureAllIndiceExists();
-  await startConnection();
-  await initPrismaModule();
+  await prisma.$connect();
   await initServer();
+  await startJobs();
 };

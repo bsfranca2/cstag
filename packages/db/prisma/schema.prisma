@@ -1,11 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["filterJson"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL_WITH_SCHEMA")
+  url      = env("DATABASE_URL")
 }
 
 model Company {
@@ -63,6 +62,7 @@ model TollPlazaPeriod {
   endAt             DateTime? @map("end_at")
 
   TollPlaza TollPlaza[]
+
   @@map("tb_toll_plaza_period")
 }
 
@@ -74,7 +74,7 @@ model TollPlaza {
   highway           String
   km                String
   category          Int
-  value             Decimal         @db.Decimal(12, 2)
+  value             Decimal?        @db.Decimal(12, 2)
   fullRoadName      String          @map("full_road_name")
   metadata          Json            @default("{}") @db.Json
   idTollPlazaPeriod Int             @map("id_toll_plaza_period")

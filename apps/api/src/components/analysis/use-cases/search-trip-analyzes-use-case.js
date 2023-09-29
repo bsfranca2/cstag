@@ -1,3 +1,4 @@
+// TODO: Remove elasticsearch
 import { search, buildTripAnalyzesQuery } from '@cstag/elasticsearch';
 
 export class SearchTripAnalyzesUseCase {

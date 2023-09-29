@@ -1,44 +1,43 @@
+
 import cluster from 'node:cluster';
 import os from 'node:os';
 import { createLogger } from '@cstag/logger';
 import { startApp, shutdown } from './server.js';
+
 const logger = createLogger();
 
-const { CLUSTER_FORKS_MIN = 1 } = process.env;
-const numCpus = Math.min(os.cpus().length, CLUSTER_FORKS_MIN);
+(() => {
+  if (!cluster.isPrimary) {
+    startApp().catch(logger.error);
+    return;
+  }
+
+  const { SERVER_FORKS = 1 } = process.env;
+  const cpusNumber = Math.min(os.availableParallelism(), +SERVER_FORKS);
+
+  logger.info(`Primary ${process.pid} is running`);
+  logger.info(`Forking server for ${cpusNumber}`);
+
+  for (let i = 0; i < cpusNumber; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code) => {
+    if (code !== 0 && !worker.exitedAfterDisconnect) {
+      logger.info(`Worker ${worker.process.pid} died`);
+      cluster.fork();
+    }
+  });
+})();
 
 process.on('uncaughtException', async (err) => {
   logger.error('Uncaught Exception', err);
-  // logMailer
   shutdown(1);
 });
 
-process.on('SIGTERM', () => {
-  logger.error('Received SIGTERM');
+const onStop = (event) => {
+  logger.info(`Received ${event}`);
   shutdown(0);
-});
-
-process.on('SIGINT', () => {
-  logger.error('Received SIGINT');
-  shutdown(0);
-});
-
-const startWorker = () => {
-  const worker = cluster.fork();
-  logger.log('startWorker#ForkedStart', { pid: worker.id });
 };
 
-if (cluster.isPrimary && numCpus > 1) {
-  logger.log('Master Process is running', { pid: process.pid });
-  for (let i = 0; i < numCpus; i++) {
-    startWorker();
-  }
-
-  cluster.on('exit', (worker) => {
-    logger.log('startWorker#ForkedDied', { pid: worker.process.pid });
-    startWorker();
-  });
-} else {
-  // eslint-disable-next-line unicorn/prefer-top-level-await
-  startApp().catch(logger.error);
-}
+['SIGINT', 'SIGTERM'].forEach((event) => process.on(event, onStop));

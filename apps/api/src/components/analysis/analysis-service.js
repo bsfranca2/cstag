@@ -1,3 +1,4 @@
+// TODO: Remove elasticsearch
 import { getClient } from '@cstag/elasticsearch';
 import { Service } from '../../db/index.js';
 const formatDate = (date) => {

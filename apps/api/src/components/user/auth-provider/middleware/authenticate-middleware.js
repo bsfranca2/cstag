@@ -1,4 +1,4 @@
-import { getPrismaClientManager } from '@cstag/db';
+import { prisma } from '@cstag/db';
 import { ResponseError } from '../../../../error.js';
 import { AuthorizationToken } from '../authorization-token.js';
 
@@ -33,7 +33,7 @@ export function getAuthenticateMiddleware(role) {
       const { tenant, userId } = await verifyToken(req);
       req.tenant = tenant;
       req.userId = userId;
-      req.repository = getPrismaClientManager().getClient(tenant);
+      req.repository = prisma;
       req.needRole = role;
       req.user = await req.repository.user.findUnique({
         where: { id: userId },

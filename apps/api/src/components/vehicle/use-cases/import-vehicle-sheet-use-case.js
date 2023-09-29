@@ -1,3 +1,4 @@
+// TODO: Refactor storage
 import { getObject } from '@cstag/core/storage';
 import { getWorkbookData, getWorkbookStream } from '../../../utils/xlsx.js';
 import { LicensePlate } from '../license-plate.js';

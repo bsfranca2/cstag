@@ -12,6 +12,6 @@
     "winston": "3.8.2"
   },
   "devDependencies": {
-    "eslint-config-custom": "*"
+    "eslint-config-custom": "workspace:*"
   }
 }

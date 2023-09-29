@@ -1,3 +1,4 @@
+// TODO: Remove elasticsearch
 import { getClient, buildTicketAnalyzesQuery } from '@cstag/elasticsearch';
 
 export class SearchTicketAnalyzesUseCase {

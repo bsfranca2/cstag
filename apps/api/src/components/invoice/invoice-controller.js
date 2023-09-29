@@ -1,4 +1,4 @@
-import { putFromMulter } from '@cstag/core/storage';
+import { putFromMulter } from '../../utils/storage.js'
 import {
   ListInvoicesUseCase,
   ImportInvoiceSheetUseCase,

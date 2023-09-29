@@ -1,10 +1,5 @@
 {
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "!apps/frontend",
-    "packages/*"
-  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -14,15 +9,9 @@
     "test": "turbo run test"
   },
   "devDependencies": {
-    "eslint-config-custom": "*",
-    "prettier": "latest",
-    "turbo": "latest"
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3",
+    "turbo": "^1.10.14"
   },
-  "packageManager": "npm@8.19.2",
-  "engines": {
-    "node": ">=14.0.0"
-  },
-  "prisma": {
-    "schema": "packages/db/prisma/schema.prisma"
-  }
+  "packageManager": "pnpm@8.8.0"
 }

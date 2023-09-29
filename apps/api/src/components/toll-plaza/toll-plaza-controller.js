@@ -1,4 +1,4 @@
-import { putFromMulter } from '@cstag/core/storage';
+import { createReadStream } from 'node:fs'
 import { toTollPlazaPeriodDTO, toTollPlazaDTO } from './toll-plaza-dto.js';
 import {
   ImportTollPlazaPeriodSheetUseCase,
@@ -17,12 +17,10 @@ import {
  */
 export const importSheet = async (req, res, next) => {
   try {
-    const { bucketName, objectName } = await putFromMulter(req.file);
     const useCase = new ImportTollPlazaPeriodSheetUseCase(req.repository);
+    const fileStream = createReadStream(req.file.path);
     await useCase.execute({
-      bucketName,
-      objectName,
-      tenant: req.tenant,
+      fileStream,
       description: req.body.description,
       startAt: new Date(req.body.startAt),
       endAt: req.body.endAt ? new Date(req.body.endAt) : null,

@@ -1,4 +1,4 @@
-import { getPrismaClientManager } from '@cstag/db';
+import { prisma } from '@cstag/db';
 
 /** @param {import("express").Request} req */
 export function getTenantFromBody(req) {
@@ -17,7 +17,7 @@ export function getTenantMidddleware(getter) {
   function tenantMiddleware(req, res, next) {
     try {
       req.tenant = getter(req);
-      req.repository = getPrismaClientManager().getClient(req.tenant);
+      req.repository = prisma;
       next();
     } catch (error) {
       next(error);
