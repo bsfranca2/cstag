@@ -1,9 +1,0 @@
-FROM node:lts-alpine
-WORKDIR /app
-COPY packages/ /app/packages/
-COPY services/api/ /app/services/api/
-COPY package*.json /app/
-RUN npm install
-WORKDIR /app/services/api
-USER node
-CMD ["npm", "run", "dev", "--workspace=services/api"]

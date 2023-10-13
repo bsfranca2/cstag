@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id            Int              @id @default(autoincrement())
+  name          String
+  cnpj          String           @db.VarChar(14)
+  headquarter   Company?         @relation("headquarter", fields: [headquarterId], references: [id])
+  branches      Company[]        @relation("headquarter")
+  headquarterId Int?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime?        @updatedAt
+  users         UsersOnCompany[]
+}
+
+model User {
+  id                         Int              @id @default(autoincrement())
+  name                       String
+  email                      String           @unique
+  password                   String
+  resetPasswordToken         String?
+  resetPasswordTokenIssuedAt DateTime?
+  isAdmin                    Boolean
+  createdAt                  DateTime         @default(now())
+  updatedAt                  DateTime?        @updatedAt
+  companies                  UsersOnCompany[]
+
+  @@index([email])
+  @@index([resetPasswordToken])
+}
+
+model UsersOnCompany {
+  company   Company   @relation(fields: [companyId], references: [id])
+  companyId Int
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  activeAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  @@id([companyId, userId])
+  @@index([companyId])
+  @@index([userId])
+}
+
+model TollPlazaPeriod {
+  id          Int         @id @default(autoincrement())
+  description String?
+  status      Int         @db.SmallInt
+  active      Boolean     @default(true)
+  startAt     DateTime
+  endAt       DateTime?
+  createdAt   DateTime    @default(now())
+  tollPlazas  TollPlaza[]
+}
+
+model TollPlaza {
+  id                   Int             @id @default(autoincrement())
+  associateCompany     String
+  highway              String
+  km                   String
+  category             Int
+  value                Decimal?        @db.Decimal(12, 2)
+  fullRoadName         String
+  additionalAttributes Json            @default("{}") @db.Json
+  tollPlazaPeriodId    Int
+  tollPlazaPeriod      TollPlazaPeriod @relation(fields: [tollPlazaPeriodId], references: [id])
+  createdAt            DateTime        @default(now())
+}
+
+// model Vehicle {
+//   idVehicle    Int      @id @default(autoincrement()) @map("id_vehicle")
+//   id           String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt    DateTime @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   licensePlate String   @map("license_plate") @db.VarChar(7)
+//   brand        String?
+//   model        String?
+//   year         Int?
+//   description  String?
+//   idCompany    Int      @map("id_company")
+//   company      Company  @relation(fields: [idCompany], references: [idCompany])
+
+//   axlesRegistries  Axl[]
+//   clientRegistries VehicleClient[]
+
+//   @@map("tb_vehicle")
+// }
+
+// model Axl {
+//   idAxl          Int              @id @default(autoincrement()) @map("id_vehicle_axl")
+//   id             String           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt      DateTime         @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   total          Int
+//   suspended      Int
+//   startAt        DateTime         @map("start_at")
+//   endAt          DateTime?        @map("end_at")
+//   idVehicle      Int              @map("id_vehicle")
+//   vehicle        Vehicle          @relation(fields: [idVehicle], references: [idVehicle])
+//   ticketAnalyzes TicketAnalysis[]
+
+//   @@map("tb_vehicle_axl")
+// }
+
+// model VehicleClient {
+//   idClient  Int       @id @default(autoincrement()) @map("id_vehicle_client")
+//   id        String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   segment   String?
+//   client    String?
+//   group     String?
+//   subgroup  String?
+//   startAt   DateTime  @map("start_at")
+//   endAt     DateTime? @map("end_at")
+//   idVehicle Int       @map("id_vehicle")
+//   vehicle   Vehicle   @relation(fields: [idVehicle], references: [idVehicle])
+
+//   @@map("tb_vehicle_client")
+// }
+
+// model Trailer {
+//   idTrailer          Int      @id @default(autoincrement()) @map("id_trailer")
+//   id                 String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt          DateTime @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   firstLicensePlate  String   @map("first_license_plate") @db.VarChar(7)
+//   secondLicensePlate String?  @map("second_license_plate") @db.VarChar(7)
+//   thirdLicensePlate  String?  @map("third_license_plate") @db.VarChar(7)
+//   kindOfEquipment    String?  @map("kind_of_equipment")
+//   model              String?
+//   axlesTotal         Int      @map("axles_total")
+//   axlesSuspended     Int      @map("axles_suspended")
+//   idCompany          Int      @map("id_company")
+//   company            Company  @relation(fields: [idCompany], references: [idCompany])
+
+//   @@map("tb_trailer")
+// }
+
+// model Invoice {
+//   idInvoice       Int      @id @default(autoincrement()) @map("id_invoice")
+//   id              String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt       DateTime @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   identifier      String
+//   operatorCompany String   @map("operator_company")
+//   source          String
+//   metadata        Json     @default("{}") @db.Json
+//   idCompany       Int      @map("id_company")
+//   company         Company  @relation(fields: [idCompany], references: [idCompany])
+
+//   progress          InvoiceProgress?
+//   tickets           Ticket[]
+//   tollValleyCredits TollValleyCredit[]
+//   monthlyPayments   MonthlyPayment[]
+
+//   @@map("tb_invoice")
+// }
+
+// model InvoiceProgress {
+//   idInvoiceProgress Int      @id @default(autoincrement()) @map("id_invoice_progress")
+//   id                String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt         DateTime @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   tickets           Int      @default(0)
+//   ticketsDone       Int      @default(0) @map("tickets_done")
+//   trips             Int      @default(0)
+//   tripsDone         Int      @default(0) @map("trips_done")
+//   idInvoice         Int      @unique @map("id_invoice")
+//   invoice           Invoice  @relation(fields: [idInvoice], references: [idInvoice])
+
+//   @@map("tb_invoice_progress")
+// }
+
+// model Ticket {
+//   idTicket     Int             @id @default(autoincrement()) @map("id_ticket")
+//   id           String          @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt    DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   type         String
+//   licensePlate String          @map("license_plate") @db.VarChar(7)
+//   category     Int
+//   highway      String?
+//   fare         Decimal         @db.Decimal(12, 2)
+//   paidAt       DateTime        @map("paid_at")
+//   trip         String?
+//   metadata     Json            @default("{}") @db.Json
+//   idInvoice    Int             @map("id_invoice")
+//   invoice      Invoice         @relation(fields: [idInvoice], references: [idInvoice])
+//   analysis     TicketAnalysis?
+
+//   @@map("tb_ticket")
+// }
+
+// model TollValleyCredit {
+//   idTollValleyCredit Int      @id @default(autoincrement()) @map("id_toll_valley_credit")
+//   id                 String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt          DateTime @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   trip               String?
+//   description        String?
+//   value              Decimal  @db.Decimal(12, 2)
+//   licensePlate       String   @map("license_plate") @db.VarChar(7)
+//   receivedAt         DateTime @map("received_at")
+//   metadata           Json     @default("{}") @db.Json
+//   idInvoice          Int      @map("id_invoice")
+//   invoice            Invoice  @relation(fields: [idInvoice], references: [idInvoice])
+
+//   @@map("tb_toll_valley_credit")
+// }
+
+// model TicketAnalysis {
+//   idTicketAnalysis Int        @id @default(autoincrement()) @map("id_ticket_analysis")
+//   id               String     @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt        DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   updatedAt        DateTime?  @map("updated_at")
+//   resultType       String?    @map("result_type")
+//   value            Decimal?   @db.Decimal(12, 2)
+//   idTicket         Int        @unique @map("id_ticket")
+//   idAxl            Int?       @map("id_vehicle_axl")
+//   idTollPlaza      Int?       @map("id_toll_plaza")
+//   ticket           Ticket     @relation(fields: [idTicket], references: [idTicket])
+//   axl              Axl?       @relation(fields: [idAxl], references: [idAxl])
+//   tollPlaza        TollPlaza? @relation(fields: [idTollPlaza], references: [idTollPlaza])
+
+//   @@map("tb_ticket_analysis")
+// }
+
+// model TripAnalysis {
+//   idTripAnalysis Int       @id @default(autoincrement()) @map("id_trip_analysis")
+//   id             String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt      DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   updatedAt      DateTime? @map("updated_at")
+//   trip           String
+//   licensePlate   String    @map("license_plate")
+//   resultType     String?   @map("result_type")
+//   transactions   Int
+//   debit          Decimal   @db.Decimal(12, 2)
+//   credit         Decimal   @db.Decimal(12, 2)
+//   difference     Decimal   @db.Decimal(12, 2)
+//   startAt        DateTime  @map("start_at")
+//   endAt          DateTime  @map("end_at")
+//   idCompany      Int       @unique @map("id_company")
+//   company        Company   @relation(fields: [idCompany], references: [idCompany])
+
+//   @@map("tb_trip_analysis")
+// }
+
+// model MonthlyPayment {
+//   idMonthlyPayment Int      @id @default(autoincrement()) @map("id_monthly_payment")
+//   id               String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+//   createdAt        DateTime @default(dbgenerated("timezone('utc'::text, now())")) @map("created_at")
+//   licensePlate     String   @map("license_plate") @db.VarChar(7)
+//   tag              String
+//   category         Int
+//   month            Int
+//   year             Int
+//   value            Decimal  @db.Decimal(12, 2)
+//   idInvoice        Int      @map("id_invoice")
+//   invoice          Invoice  @relation(fields: [idInvoice], references: [idInvoice])
+
+//   @@map("tb_monthly_payment")
+// }
